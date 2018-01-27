@@ -102,6 +102,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# To make PyCharm shut up
+DEFAULT_INDEX_TABLESPACE = ''
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
