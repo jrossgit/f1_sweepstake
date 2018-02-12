@@ -14,4 +14,6 @@ urlpatterns = [
 router = SimpleRouter()
 router.register('teams', views.TeamsViewSet)
 router.register('drivers', views.DriversViewSet)
+# router.register('seasons', views.SeasonViewSet, base_name='season')
+router.register('races', views.RaceResultViewSet)   # todo: look up router naming again
 urlpatterns += router.urls

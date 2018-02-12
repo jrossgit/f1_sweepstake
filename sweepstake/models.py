@@ -78,6 +78,7 @@ class DriverResult(models.Model):
 
 
 
+
 admin.site.register(Team)
 admin.site.register(Driver)
 admin.site.register(Race)
