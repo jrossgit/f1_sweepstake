@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Sum
 from django.contrib import admin
 
-import config
+from sweepstake import config
 
 class Player(models.Model):
 
@@ -40,7 +40,7 @@ class Race(models.Model):
 
     @property
     def season(self):
-        return unicode(self.date.year)
+        return str(self.date.year)
 
     def set_fastest_lap(self, driver):
         self.results.add(
@@ -93,7 +93,7 @@ class Team(models.Model):
     colour = models.CharField(max_length=7)  # Hex code string, e.g. '#ff0000'
     active = models.BooleanField(default=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u'<Team: {}>'.format(self.name)
 
 
@@ -101,20 +101,20 @@ class Driver(models.Model):
 
     active = models.BooleanField(default=True)
     name = models.CharField(max_length=30)
-    team = models.ForeignKey(Team, related_name='drivers')
+    team = models.ForeignKey(Team, related_name='drivers', on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return u'<Driver: {}>'.format(self.name)
 
 
 class DriverResult(models.Model):
 
-    race = models.ForeignKey(Race, related_name='race_results')
-    driver = models.ForeignKey(Driver, related_name='race_results')
+    race = models.ForeignKey(Race, related_name='race_results', on_delete=models.CASCADE)
+    driver = models.ForeignKey(Driver, related_name='race_results', on_delete=models.CASCADE)
     position = models.IntegerField(null=True, blank=True)
     classified = models.NullBooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return u'<Result: {}, {}>'.format(self.race, self.driver)
 
     class Meta:
@@ -123,7 +123,7 @@ class DriverResult(models.Model):
 
 class PointsValue(models.Model):
     """race is available as a foreignkey"""
-    driver = models.ForeignKey(Driver, related_name='points')
+    driver = models.ForeignKey(Driver, related_name='points', on_delete=models.CASCADE)
     points = models.IntegerField()
     position = models.IntegerField(null=True, blank=True)
     fastest_lap = models.BooleanField(default=False)
@@ -132,8 +132,8 @@ class PointsValue(models.Model):
 
 
 class PlayerSelection(models.Model):
-    race = models.ForeignKey(Race, related_name='selections')
-    player = models.ForeignKey(Player, related_name='selections')
+    race = models.ForeignKey(Race, related_name='selections', on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, related_name='selections', on_delete=models.CASCADE)
     drivers = models.ManyToManyField(Driver, max_length=3)
 
 

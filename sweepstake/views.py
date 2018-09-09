@@ -3,9 +3,9 @@ from random import randint
 from django.utils import timezone
 from rest_framework import viewsets, generics
 
-from config import TOP_DRIVERS, BOTTOM_DRIVERS
-from models import Team, Driver, Race, PlayerSelection
-from serializers import TeamSerializer, DriverSerializer, RaceResultSerializer
+from sweepstake.config import TOP_DRIVERS, BOTTOM_DRIVERS
+from sweepstake.models import Team, Driver, Race, PlayerSelection
+from sweepstake.serializers import TeamSerializer, DriverSerializer, RaceResultSerializer
 
 
 class TeamsViewSet(viewsets.ReadOnlyModelViewSet):

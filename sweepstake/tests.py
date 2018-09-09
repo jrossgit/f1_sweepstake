@@ -2,12 +2,11 @@
 
 from datetime import date
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase as DjangoTestCase
 from django.urls import reverse
-from rest_framework.test import APITestCase, APITransactionTestCase
+from rest_framework.test import APITestCase
 
-import models, config
+from sweepstake import models, config
 
 
 class DriverTests(DjangoTestCase):
@@ -24,7 +23,7 @@ class DriverTests(DjangoTestCase):
     def test_can_save_unicode_driver(self):
         self.driver2.refresh_from_db()
         self.assertEqual(self.driver2.name, u'Kimi Räikkönen')
-        self.assertIn(u'Kimi Räikkönen', unicode(self.driver2))
+        self.assertIn(u'Kimi Räikkönen', self.driver2)
 
 
 class RaceResultsTest(DjangoTestCase):
@@ -55,7 +54,7 @@ class RaceResultsTest(DjangoTestCase):
         cls.race.activate()
 
     def test_unicode_string_for_race(self):
-        self.assertEqual(u'2017 Moldovan GP', unicode(self.race))
+        self.assertEqual(u'2017 Moldovan GP', self.race)
 
     def test_race_in_correct_season(self):
         self.assertEqual(self.race.season, u'2017')
@@ -109,7 +108,6 @@ class PreviousYearTest(APITestCase):
     def test_get_race_result(self):
         race_result_url = reverse('race-detail', kwargs={'pk': self.race.pk})
         response = self.client.get(race_result_url)
-        print response
         self.assertEqual(response.status_code, 200)
 
     def test_get_missing_race_result(self):

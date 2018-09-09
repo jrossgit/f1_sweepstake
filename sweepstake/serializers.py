@@ -1,5 +1,5 @@
 from rest_framework import serializers
-import models
+from sweepstake import models
 
 
 class SimpleTeamSerializer(serializers.ModelSerializer):

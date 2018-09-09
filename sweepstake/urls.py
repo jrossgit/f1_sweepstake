@@ -5,7 +5,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from rest_framework.routers import SimpleRouter
 
-import views
+from sweepstake import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
