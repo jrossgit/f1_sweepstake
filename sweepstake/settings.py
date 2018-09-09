@@ -25,7 +25,7 @@ SECRET_KEY = 'c2q0j!7%6g3v!#_f8l8bbph-^2o)5p%0wxufjdg^dp4o^74)b*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['file']
 
 
 # Application definition
@@ -53,6 +53,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'sweepstake.urls'
+CORS_HEADERS_ALLOW_ALL = True
 
 TEMPLATES = [
     {

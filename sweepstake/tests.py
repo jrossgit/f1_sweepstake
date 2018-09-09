@@ -48,16 +48,11 @@ class RaceResultsTest(DjangoTestCase):
 
         cls.race = models.Race.objects.create(name='Moldovan GP', date=date(2017, 1, 1))
         cls.unraced_race = models.Race.objects.create(name='Kyrgyzstani GP', date=date(2017, 1, 2))
-        cls.race.fastest_lap = cls.drivers[1]
-        cls.race.pole = cls.drivers[2]
+        cls.race.set_fastest_lap(cls.drivers[1])
+        cls.race.set_pole(cls.drivers[2])
+        cls.race.set_results(cls.drivers[:6], 6)
         cls.race.save()
         cls.race.activate()
-
-        for i, driver in enumerate(cls.drivers[:6]):
-            result = models.DriverResult.objects.get(race=cls.race, driver=driver)
-            result.position = i
-            result.classified = True
-            result.save()
 
     def test_unicode_string_for_race(self):
         self.assertEqual(u'2017 Moldovan GP', unicode(self.race))
@@ -75,16 +70,11 @@ class RaceResultsTest(DjangoTestCase):
     def test_fastest_lap_driver_scores_points(self):
         self.assertEqual(self.race.points_for_driver(self.drivers[1]), 5 + config.POINTS_FOR_FASTEST_LAP)
 
-    def test_missing_driver_raises_error(self):
-        with self.assertRaises(ObjectDoesNotExist):
-            self.race.points_for_driver(self.drivers[6])
-
-    def test_unraced_has_blank_results(self):
-        self.assertEqual(self.unraced_race.results.count(), 0)
-        self.unraced_race.activate()
-        self.assertEqual(self.unraced_race.results.count(), 6)
-        with self.assertRaises(RuntimeError):
-            self.unraced_race.points_for_driver(self.drivers[0])
+    def test_race_table_for_one_race(self):
+        race_table = models.Race.objects.filter(name='Moldovan GP').get_driver_standings()
+        self.assertEqual(race_table[5], self.drivers[5])
+        self.assertEqual(race_table[0].total_points, 5 + config.POINTS_FOR_FASTEST_LAP)
+        self.assertEqual(len(race_table), 6)
 
 
 class PreviousYearTest(APITestCase):
@@ -97,14 +87,9 @@ class PreviousYearTest(APITestCase):
         cls.race = models.Race.objects.create(name='Yemeni GP', date=date(2017,1,5))
 
         cls.race.activate()
-        result = models.DriverResult.objects.get(race=cls.race, driver=cls.driver1)
-        result.position = 1
-        result.classified = True
-        result.save()
-        result = models.DriverResult.objects.get(race=cls.race, driver=cls.driver2)
-        result.position = 2
-        result.classified = True
-        result.save()
+        cls.race.set_results([cls.driver1, cls.driver2], 2)
+        cls.race.set_pole(cls.driver1)
+        cls.race.set_fastest_lap(cls.driver2)
 
     def test_get_teams(self):
         """
@@ -118,15 +103,13 @@ class PreviousYearTest(APITestCase):
     def test_get_drivers(self):
         driver_list_url = reverse('driver-list')
         response = self.client.get(driver_list_url)
-        print driver_list_url
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data, list)
 
     def test_get_race_result(self):
         race_result_url = reverse('race-detail', kwargs={'pk': self.race.pk})
-        print self.race
-        print race_result_url
         response = self.client.get(race_result_url)
+        print response
         self.assertEqual(response.status_code, 200)
 
     def test_get_missing_race_result(self):
@@ -143,3 +126,8 @@ class PreviousYearTest(APITestCase):
     #     season_result_url = reverse('season-detail', kwargs={'year': 2020})
     #     response = self.client.get(season_result_url)
     #     self.assertEqual(response.status_code, 404)
+
+
+# class DriverSelectionTest(DjangoTestCase):
+#
+#     def setUp(self):

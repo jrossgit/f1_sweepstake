@@ -1,7 +1,17 @@
 from rest_framework import serializers
 import models
 
+
+class SimpleTeamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Team
+        fields = ('name', 'colour')
+
+
 class DriverSerializer(serializers.ModelSerializer):
+
+    team = SimpleTeamSerializer
 
     class Meta:
         model = models.Driver
@@ -17,12 +27,18 @@ class TeamSerializer(serializers.ModelSerializer):
         fields = ('name', 'colour', 'drivers')
 
 
-class RaceSerializer(serializers.ModelSerializer):
+class RaceResultSerializer(serializers.ModelSerializer):
+
+    fastest_lap = serializers.SerializerMethodField()
+
+    pole = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Race
         fields = ('name', 'date', 'fastest_lap', 'pole', 'results')
 
+    def get_fastest_lap(self, instance, *args, **kwargs):
+        return DriverSerializer(models.PointsValue.objects.get(race=instance, fastest_lap=True).driver).data
 
-class SeasonSerializer(serializers.ModelSerializer):
-    pass # only allow detail views
+    def get_pole(self, instance, *args, **kwargs):
+        return DriverSerializer(models.PointsValue.objects.get(race=instance, pole=True).driver).data

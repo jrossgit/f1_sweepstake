@@ -1,0 +1,9 @@
+Django==1.11.8
+django-extensions==1.9.9
+django-rest-framework==0.1.0
+django-shell-plus==1.1.7
+djangorestframework==3.7.7
+pytz==2017.3
+selenium==3.8.0
+six==1.11.0
+typing==3.6.2
