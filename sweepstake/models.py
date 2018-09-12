@@ -136,7 +136,7 @@ class PlayerSelection(models.Model):
     race = models.ForeignKey(Race, related_name='selections', on_delete=models.CASCADE)
     player = models.ForeignKey(Player, related_name='selections', on_delete=models.CASCADE)
     drivers = models.ManyToManyField(Driver, max_length=3)
-    points = models.IntegerField(default=0)
+    points = models.IntegerField(blank=True, null=True)
 
     def set_points(self):
         self.points = PointsValue.objects.filter(

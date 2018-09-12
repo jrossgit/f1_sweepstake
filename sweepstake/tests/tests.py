@@ -88,7 +88,7 @@ class TestSelectionGeneration(DjangoTestCase):
         self.assertEqual(self.drivers, random_3_drivers(models.Driver.objects.all(), 1, 1))
 
     def test_that_it_evaluates_points(self):
-        self.assertEqual(0, self.selection.points)
+        self.assertEqual(None, self.selection.points)
         self.race.set_results(self.drivers, 3)
         self.selection.set_points()
         self.assertEqual(6, self.selection.points)
