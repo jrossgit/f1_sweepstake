@@ -29,8 +29,10 @@ class RaceResultViewSet(viewsets.ReadOnlyModelViewSet):
 class GenerateDriversView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
+
         player = Driver.objects.get(pk=request.json['player'])
         race = Race.objects.get(pk=request.json['race'])
+
         year = timezone.now().year
         qs = Race.objects.filter(date__year=year)
         if not qs.exists():
@@ -38,18 +40,18 @@ class GenerateDriversView(generics.CreateAPIView):
 
         drivers = PlayerSelection.objects.create(
             player=player,
-            drivers=self.random_drivers(qs.get_driver_standings()),
+            drivers=random_3_drivers(qs.get_driver_standings()),
             race=race
         )
 
         return drivers
 
-    @staticmethod
-    def random_drivers(drivers):
-        count = drivers.count()
 
-        return (
-            randint(0, TOP_DRIVERS - 1),
-            randint(TOP_DRIVERS, count - BOTTOM_DRIVERS - 1),
-            randint(count - BOTTOM_DRIVERS, count - 1)
-        )
+def random_3_drivers(drivers, top_drivers=TOP_DRIVERS, bottom_drivers=BOTTOM_DRIVERS):
+    count = drivers.count()
+    indices = (
+        randint(0, top_drivers - 1),
+        randint(top_drivers, count - bottom_drivers - 1),
+        randint(count - bottom_drivers, count - 1)
+    )
+    return [drivers[i] for i in indices]

@@ -3,11 +3,9 @@
 from datetime import date
 
 from django.test import TestCase as DjangoTestCase
-from django.urls import reverse
-from rest_framework.test import APITestCase
 
 from sweepstake import models, config
-
+from sweepstake.views import random_3_drivers
 
 class DriverTests(DjangoTestCase):
 
@@ -16,14 +14,9 @@ class DriverTests(DjangoTestCase):
         self.driver1 = models.Driver.objects.create(name='Joe Bloggs', team=self.team)
         self.driver2 = models.Driver.objects.create(name=u'Kimi Räikkönen', team=self.team)
 
-    def test_can_create_drivers(self):
-        self.assertEqual(self.driver1.name, 'Joe Bloggs')
-        self.assertEqual(self.team.drivers.count(), 2)
-
     def test_can_save_unicode_driver(self):
         self.driver2.refresh_from_db()
         self.assertEqual(self.driver2.name, u'Kimi Räikkönen')
-        self.assertIn(u'Kimi Räikkönen', self.driver2)
 
 
 class RaceResultsTest(DjangoTestCase):
@@ -54,7 +47,7 @@ class RaceResultsTest(DjangoTestCase):
         cls.race.activate()
 
     def test_unicode_string_for_race(self):
-        self.assertEqual(u'2017 Moldovan GP', self.race)
+        self.assertEqual(u'2017 Moldovan GP', str(self.race))
 
     def test_race_in_correct_season(self):
         self.assertEqual(self.race.season, u'2017')
@@ -76,56 +69,26 @@ class RaceResultsTest(DjangoTestCase):
         self.assertEqual(len(race_table), 6)
 
 
-class PreviousYearTest(APITestCase):
+class TestSelectionGeneration(DjangoTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.team = models.Team.objects.create(name='Placeholder', colour='#ff0000')
-        cls.driver1 = models.Driver.objects.create(name='Joe Bloggs', team=cls.team)
-        cls.driver2 = models.Driver.objects.create(name=u'Kimi Räikkönen', team=cls.team)
-        cls.race = models.Race.objects.create(name='Yemeni GP', date=date(2017,1,5))
+        team = models.Team.objects.create(name='Team C', colour='#000000')
+        cls.drivers = [
+            models.Driver.objects.create(name='Driver A1', team=team),
+            models.Driver.objects.create(name='Driver B1', team=team),
+            models.Driver.objects.create(name='Driver C1', team=team),
+        ]
+        player = models.Player.objects.create(name='Joe')
+        cls.race = models.Race.objects.create(name='Turkmenistani GP', date=date(2018, 1, 1))
+        cls.selection = models.PlayerSelection.objects.create(player=player, race=cls.race)
+        cls.selection.drivers.set(cls.drivers)
 
-        cls.race.activate()
-        cls.race.set_results([cls.driver1, cls.driver2], 2)
-        cls.race.set_pole(cls.driver1)
-        cls.race.set_fastest_lap(cls.driver2)
+    def test_that_it_generates_three_distinct_drivers(self):
+        self.assertEqual(self.drivers, random_3_drivers(models.Driver.objects.all(), 1, 1))
 
-    def test_get_teams(self):
-        """
-        Ensure we can create a new account object.
-        """
-        teams_list_url = reverse('team-list')
-        response = self.client.get(teams_list_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data, list)
-
-    def test_get_drivers(self):
-        driver_list_url = reverse('driver-list')
-        response = self.client.get(driver_list_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.data, list)
-
-    def test_get_race_result(self):
-        race_result_url = reverse('race-detail', kwargs={'pk': self.race.pk})
-        response = self.client.get(race_result_url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_missing_race_result(self):
-        race_result_url = reverse('race-detail', kwargs={'pk': 10})
-        response = self.client.get(race_result_url)
-        self.assertEqual(response.status_code, 404)
-
-    # def test_get_season_result(self):
-    #     season_result_url = reverse('season-detail', kwargs={'year': 2017})
-    #     response = self.client.get(season_result_url)
-    #     self.assertEqual(response.status_code, 200)
-    #
-    # def test_get_missing_season_result(self):
-    #     season_result_url = reverse('season-detail', kwargs={'year': 2020})
-    #     response = self.client.get(season_result_url)
-    #     self.assertEqual(response.status_code, 404)
-
-
-# class DriverSelectionTest(DjangoTestCase):
-#
-#     def setUp(self):
+    def test_that_it_evaluates_points(self):
+        self.assertEqual(0, self.selection.points)
+        self.race.set_results(self.drivers, 3)
+        self.selection.set_points()
+        self.assertEqual(6, self.selection.points)

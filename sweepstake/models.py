@@ -35,7 +35,7 @@ class Race(models.Model):
     class Meta:
         order_with_respect_to = 'date'
 
-    def __unicode__(self):
+    def __str__(self):
         return '{} {}'.format(self.season, self.name)
 
     @property
@@ -122,7 +122,6 @@ class DriverResult(models.Model):
 
 
 class PointsValue(models.Model):
-    """race is available as a foreignkey"""
     driver = models.ForeignKey(Driver, related_name='points', on_delete=models.CASCADE)
     points = models.IntegerField()
     position = models.IntegerField(null=True, blank=True)
@@ -130,11 +129,21 @@ class PointsValue(models.Model):
     pole = models.BooleanField(default=False)
     classified = models.NullBooleanField()
 
+    # ForeignKey reverse: race
+
 
 class PlayerSelection(models.Model):
     race = models.ForeignKey(Race, related_name='selections', on_delete=models.CASCADE)
     player = models.ForeignKey(Player, related_name='selections', on_delete=models.CASCADE)
     drivers = models.ManyToManyField(Driver, max_length=3)
+    points = models.IntegerField(default=0)
+
+    def set_points(self):
+        self.points = PointsValue.objects.filter(
+            race=self.race,
+            driver__in=self.drivers.all()
+        ).aggregate(models.Sum('points'))['points__sum']
+        self.save()
 
 
 admin.site.register(Team)
