@@ -58,10 +58,19 @@ class PreviousYearTest(APITestCase):
 
 class SeasonSpecificViewTests(APITestCase):
 
-    def setUpClass(cls):
+    @classmethod
+    def setUpTestData(cls):
         cls.team = models.Team.objects.create(name='Placeholder', colour='#ff0000')
-        cls.driver1 = models.Driver.objects.create(name='Joe Bloggs', team=cls.team)
-        cls.driver2 = models.Driver.objects.create(name=u'Kimi Räikkönen', team=cls.team)
-        cls.race = models.Race.objects.create(name='Nicaraguan GP', date=date(2017,1,5))
-        cls.race = models.Race.objects.create(name='Burmese GP', date=date(2018,1,5))
+        cls.driver1 = models.Driver.objects.create(id=1, name='Joe Bloggs', team=cls.team)
+        cls.driver2 = models.Driver.objects.create(id=2, name=u'Kimi Räikkönen', team=cls.team)
+        cls.race_last_year = models.Race.objects.create(name='Nicaraguan GP', date=date(2017,1,5))
+        cls.race_this_year = models.Race.objects.create(name='Burmese GP', date=date(2018,1,5))
+        cls.race_this_year.set_results([cls.driver1, cls.driver2], 2)
+        cls.race_last_year.set_results([cls.driver2, cls.driver1], 2)
 
+    def test_that_correct_race_is_selected(self):
+        season_url = reverse('season-detail', kwargs={'season': 2018})
+        response = self.client.get(season_url)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['race']['name'], self.race_this_year.name)
+        self.assertEqual(response.data[0]['race']['winner']['driver']['id'], 1)
