@@ -53,3 +53,15 @@ class PreviousYearTest(APITestCase):
         race_result_url = reverse('race-detail', kwargs={'pk': 10})
         response = self.client.get(race_result_url)
         self.assertEqual(response.status_code, 404)
+
+
+
+class SeasonSpecificViewTests(APITestCase):
+
+    def setUpClass(cls):
+        cls.team = models.Team.objects.create(name='Placeholder', colour='#ff0000')
+        cls.driver1 = models.Driver.objects.create(name='Joe Bloggs', team=cls.team)
+        cls.driver2 = models.Driver.objects.create(name=u'Kimi Räikkönen', team=cls.team)
+        cls.race = models.Race.objects.create(name='Nicaraguan GP', date=date(2017,1,5))
+        cls.race = models.Race.objects.create(name='Burmese GP', date=date(2018,1,5))
+

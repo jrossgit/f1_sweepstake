@@ -11,7 +11,7 @@ class SimpleTeamSerializer(serializers.ModelSerializer):
 
 class DriverSerializer(serializers.ModelSerializer):
 
-    team = SimpleTeamSerializer
+    team = SimpleTeamSerializer()
 
     class Meta:
         model = models.Driver
