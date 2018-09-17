@@ -52,4 +52,4 @@ class RaceResultSummarySerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'date', 'winner')
 
     def get_winner(self, instance, *args, **kwargs):
-        return DriverSerializer(models.PointsValue.objects.get(race=instance, fastest_lap=True).driver).data
+        return DriverSerializer(models.PointsValue.objects.get(race=instance, position=1).driver).data

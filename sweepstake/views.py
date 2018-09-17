@@ -27,13 +27,11 @@ class RaceResultViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class SimpleRaceResultView(generics.ListAPIView):
-    # queryset = Race.objects.all()
+    queryset = Race.objects.all()
     serializer_class = RaceResultSummarySerializer
-    lookup_field = 'date__year'
-    lookup_url_kwarg = 'season'
 
-    def get_queryset(self, *args, **kwargs):
-        return Race.objects.filter(date__year=kwargs['date__year'])
+    def filter_queryset(self, queryset):
+        return queryset.filter(date__year=self.kwargs['season'])
 
 
 class GenerateDriversView(generics.CreateAPIView):
