@@ -55,7 +55,6 @@ class PreviousYearTest(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-
 class SeasonSpecificViewTests(APITestCase):
 
     @classmethod
@@ -75,9 +74,9 @@ class SeasonSpecificViewTests(APITestCase):
         self.assertEqual(response.data[0]['name'], self.race_this_year.name)
         self.assertEqual(response.data[0]['winner']['name'], self.driver1.name)
 
-    def test_that_correct_race_results_are_selected(self):
-        race_url = reverse('season-detail', kwargs={'season': 2018, 'race': 1})
-        response = self.client.get(race_url)
-        self.assertEqual(response.data['name'], self.race_this_year.name)
-        self.assertEqual(len(response.data['results']), 2)
-        self.assertEqual(response.data['results'][0]['driver']['name'], self.driver1.name)
+    def test_that_driver_standings_can_be_retrieved(self):
+        standings_url = reverse('standings-detail', kwargs={'season': 2018})
+        response = self.client.get(standings_url)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]['name'], self.driver1.name)
+        self.assertEqual(response.data[0]['total_points'], 2)

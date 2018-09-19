@@ -8,7 +8,8 @@ from rest_framework.routers import SimpleRouter
 from sweepstake import views
 
 season_urls = [
-    path('<int:season>/', views.SimpleRaceResultView.as_view(), name='season-detail')
+    path('<int:season>/', views.SimpleRaceResultView.as_view(), name='season-detail'),
+    path('<int:season>/drivers/', views.SeasonStandingsView.as_view(), name='standings-detail'),
 ]
 
 urlpatterns = [

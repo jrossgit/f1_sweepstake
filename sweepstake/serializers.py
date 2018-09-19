@@ -53,3 +53,11 @@ class RaceResultSummarySerializer(serializers.ModelSerializer):
 
     def get_winner(self, instance, *args, **kwargs):
         return DriverSerializer(models.PointsValue.objects.get(race=instance, position=1).driver).data
+
+
+class SeasonResultSerializer(serializers.ModelSerializer):
+    total_points = serializers.FloatField()
+
+    class Meta:
+        model = models.Driver
+        fields = ('name', 'team', 'total_points')

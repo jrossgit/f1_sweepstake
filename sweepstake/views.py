@@ -5,7 +5,9 @@ from rest_framework import viewsets, generics
 
 from sweepstake.config import TOP_DRIVERS, BOTTOM_DRIVERS
 from sweepstake.models import Team, Driver, Race, PlayerSelection
-from sweepstake.serializers import TeamSerializer, DriverSerializer, RaceResultSerializer, RaceResultSummarySerializer
+from sweepstake.serializers import (TeamSerializer, DriverSerializer,
+                                    RaceResultSerializer, RaceResultSummarySerializer,
+                                    SeasonResultSerializer)
 
 
 class TeamsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -32,6 +34,14 @@ class SimpleRaceResultView(generics.ListAPIView):
 
     def filter_queryset(self, queryset):
         return queryset.filter(date__year=self.kwargs['season'])
+
+
+class SeasonStandingsView(generics.ListAPIView):
+    queryset = Race.objects.all()
+    serializer_class = SeasonResultSerializer
+
+    def filter_queryset(self, queryset):
+        return queryset.filter(date__year=self.kwargs['season']).get_driver_standings()
 
 
 class GenerateDriversView(generics.CreateAPIView):
